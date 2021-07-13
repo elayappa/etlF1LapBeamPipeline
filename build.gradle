@@ -21,11 +21,15 @@ repositories {
 
 dependencies {
     implementation 'org.apache.beam:beam-sdks-java-core:2.30.0'
-    implementation 'org.codehaus.groovy:groovy-all:3.0.5'
+    /*implementation 'org.codehaus.groovy:groovy-all:3.0.5'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'*/
+    implementation 'junit:junit:4.13.1'
+    runtimeOnly 'org.slf4j:slf4j-jdk14:1.7.30'
+    runtimeOnly 'org.apache.beam:beam-runners-direct-java:2.30.0'
+    runtimeOnly 'org.apache.beam:beam-runners-portability-java:2.30.0'
 }
 
 /*test {

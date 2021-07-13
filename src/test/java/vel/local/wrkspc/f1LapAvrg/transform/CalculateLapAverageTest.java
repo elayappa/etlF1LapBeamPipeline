@@ -17,7 +17,7 @@ import vel.local.wrkspc.f1LapAvrg.extract.ParseDriverLapCsvRecordTest;
 public class CalculateLapAverageTest {
 
     public static final KV[] KEY_VALUES_DRIVER_AVERAGE = {
-            KV.of("Alonzo", 4.526667),
+            KV.of("Alonzo", 4.52666666666666666666),
             /*KV.of("Alonzo", 4.88),
             KV.of("Alonzo", 4.38),*/
             KV.of("Verstrappen", 4.63),
@@ -49,5 +49,6 @@ public class CalculateLapAverageTest {
                         .apply(ParDo.of(new ParseDriverLapCsvRecord()));
         PCollection<KV<String, Double>> driverLapAverage = parsedInputRecords.apply(new CalculateLapAverage());
         PAssert.that(driverLapAverage).containsInAnyOrder(KEY_VALUES_DRIVER_AVERAGE);
+        p.run().waitUntilFinish();
     }
 }

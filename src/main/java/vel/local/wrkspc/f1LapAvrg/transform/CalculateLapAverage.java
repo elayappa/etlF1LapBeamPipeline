@@ -23,6 +23,6 @@ public class CalculateLapAverage extends PTransform<PCollection<KV<String, Doubl
      */
     @Override
     public PCollection<KV<String, Double>> expand(PCollection<KV<String, Double>> input) {
-        return null;
+        return input.apply(Mean.perKey());
     }
 }

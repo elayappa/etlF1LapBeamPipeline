@@ -30,4 +30,15 @@ public class SortDriversByLapTest implements Serializable {
         PAssert.that(sortedDrivers).containsInAnyOrder(Arrays.asList(TestData.FORMATTED_OUTPUT));
         p.run().waitUntilFinish();
     }
+
+    @Test(expected = AssertionError.class)
+    public void testSortDriversByLapTestFailure() {
+        PCollection<KV<String, Double>> parsedInputRecords =
+                p.apply(Create.of(TestData.INPUT_CSV_RECORDS).withCoder(StringUtf8Coder.of()))
+                        .apply(ParDo.of(new ParseDriverLapCsvRecord()));
+        PCollection<KV<String, Double>> driverLapAverage = parsedInputRecords.apply(new CalculateLapAverage());
+        PCollection<String> sortedDrivers = driverLapAverage.apply(new SortDriversByLap());
+        PAssert.that(sortedDrivers).containsInAnyOrder(Arrays.asList(TestData.UNSORTED_FORMATTED_OUTPUT));
+        p.run().waitUntilFinish();
+    }
 }

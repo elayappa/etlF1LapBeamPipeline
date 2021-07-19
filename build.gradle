@@ -34,8 +34,8 @@ dependencies {
     runtimeOnly 'org.apache.beam:beam-runners-direct-java:2.30.0'
     runtimeOnly 'org.apache.beam:beam-runners-portability-java:2.30.0'
     testRuntimeOnly 'org.projectlombok:lombok:1.18.18'
-    testRuntimeOnly 'org.apache.hadoop:hadoop-common:3.3.1'
-    testRuntimeOnly 'org.apache.hadoop:hadoop-mapreduce-client-core:3.3.1'
+    runtimeOnly 'org.apache.hadoop:hadoop-common:3.3.1'
+    runtimeOnly 'org.apache.hadoop:hadoop-mapreduce-client-core:3.3.1'
 }
 
 /*test {

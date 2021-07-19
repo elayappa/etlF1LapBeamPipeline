@@ -52,6 +52,6 @@ public class TestData {
 
     public static final String FORMATTED_OUTPUT = SORTED_DRIVERS.stream()
             .map(value -> String.format("%s,%s", value.getName(), value.getLapTime()))
-            .collect(Collectors.joining(String.format(";")));
+            .collect(Collectors.joining(System.lineSeparator()));
 
 }

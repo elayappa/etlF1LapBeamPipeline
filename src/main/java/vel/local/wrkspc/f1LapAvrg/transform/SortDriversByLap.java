@@ -3,17 +3,19 @@ package vel.local.wrkspc.f1LapAvrg.transform;
 import org.apache.beam.sdk.coders.*;
 import org.apache.beam.sdk.extensions.sorter.BufferedExternalSorter;
 import org.apache.beam.sdk.extensions.sorter.SortValues;
-import org.apache.beam.sdk.testing.TestPipeline;
-import org.apache.beam.sdk.transforms.*;
+import org.apache.beam.sdk.transforms.GroupByKey;
+import org.apache.beam.sdk.transforms.MapElements;
+import org.apache.beam.sdk.transforms.PTransform;
+import org.apache.beam.sdk.transforms.SimpleFunction;
 import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.values.PCollection;
 import vel.local.wrkspc.f1LapAvrg.model.DriverLapRecord;
 
-import java.util.Arrays;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
-//public class SortDriversByLap extends PTransform<PCollection<KV<String, Double>>, PCollection<TreeSet<DriverLapRecord>>> {
-public class SortDriversByLap extends PTransform<PCollection<KV<String, Double>>, PCollection<Iterable<KV<DriverLapRecord, Double>>>> {
+public class SortDriversByLap extends PTransform<PCollection<KV<String, Double>>, PCollection<String>> {
 
     /**
      * Override this method to specify how this {@code PTransform} should be expanded on the given
@@ -31,18 +33,8 @@ public class SortDriversByLap extends PTransform<PCollection<KV<String, Double>>
      * @return
      */
     @Override
-    //public PCollection<TreeSet<DriverLapRecord>> expand(PCollection<KV<String, Double>> input) {
-    public PCollection<Iterable<KV<DriverLapRecord, Double>>> expand(PCollection<KV<String, Double>> input) {
-        TestPipeline p = TestPipeline.create();
-        PCollection<TreeSet<DriverLapRecord>> treeSetOfDrivers = p.apply(Create.of(Arrays.asList(
-                new TreeSet<DriverLapRecord>() {{
-                    {
-                        add(new DriverLapRecord("a", 1));
-                        add(new DriverLapRecord("b", 2));
-                    }
-                }})));
+    public PCollection<String> expand(PCollection<KV<String, Double>> input) {
         BufferedExternalSorter.Options options1 = BufferedExternalSorter.options();
-        TreeSet<DriverLapRecord> driverLapRecordsTreeSet = new TreeSet<>();
         return input
                 .apply("CreateKey", MapElements.via(new SimpleFunction<KV<String, Double>, KV<String, KV<DriverLapRecord, Double>>>() {
                     public KV<String, KV<DriverLapRecord, Double>> apply(KV<String, Double> input) {
@@ -51,20 +43,16 @@ public class SortDriversByLap extends PTransform<PCollection<KV<String, Double>>
                 }))
                 .apply(GroupByKey.create()).setCoder(KvCoder.of(StringUtf8Coder.of(), IterableCoder.of(KvCoder.of(AvroCoder.of(DriverLapRecord.class), DoubleCoder.of()))))
                 .apply(SortValues.create(options1))
-                //.apply("FormatResults", MapElements.via(new SimpleFunction<KV<String, Iterable<KV<DriverLapRecord, Double>>>, TreeSet<DriverLapRecord>>() {
-                .apply("FormatResults", MapElements.via(new SimpleFunction<KV<String, Iterable<KV<DriverLapRecord, Double>>>, Iterable<KV<DriverLapRecord, Double>>>() {
+                .apply("FormatResults", MapElements.via(new SimpleFunction<KV<String, Iterable<KV<DriverLapRecord, Double>>>, String>() {
                     @Override
-                    //public TreeSet<DriverLapRecord> apply(KV<String, Iterable<KV<DriverLapRecord, Double>>> input) {
-                    public Iterable<KV<DriverLapRecord, Double>> apply(KV<String, Iterable<KV<DriverLapRecord, Double>>> input) {
-                        /*List<DriverLapRecord> driverLapRecords = StreamSupport.stream(input.getValue().spliterator(), false)
-                                .map(value -> value.getKey())
-                                .collect(Collectors.toList());
-                        Collections.sort(driverLapRecords);
-                        driverLapRecordsTreeSet.addAll(driverLapRecords);
-                        return driverLapRecordsTreeSet;*/
-                        return input.getValue();
+                    public String apply(KV<String, Iterable<KV<DriverLapRecord, Double>>> input) {
+                        TreeSet<DriverLapRecord> driverLapRecords = new TreeSet<>(StreamSupport.stream(input.getValue().spliterator(), false)
+                                .map(value -> value.getKey()).collect(Collectors.toList()));
+                        String collect = driverLapRecords.stream()
+                                .map(value -> String.format("%s,%s", value.getName(), value.getLapTime()))
+                                .collect(Collectors.joining(System.lineSeparator()));
+                        return collect;
                     }
-                }));//.setCoder(treeSetOfDrivers.getCoder());
-
+                }));
     }
 }

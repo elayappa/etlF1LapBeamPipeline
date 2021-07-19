@@ -54,4 +54,20 @@ public class TestData {
             .map(value -> String.format("%s,%s", value.getName(), value.getLapTime()))
             .collect(Collectors.joining(System.lineSeparator()));
 
+    public static final String UNSORTED_FORMATTED_OUTPUT = KEY_VALUES_DRIVER_AVERAGE.stream()
+            .map(value -> String.format("%s,%s", value.getKey(), value.getValue()))
+            .collect(Collectors.joining(System.lineSeparator()));
+
+
+    public static final List<String> INPUT_ERR_CSV_RECORDS = Arrays.asList(
+            "Alonzo,4.32,hafdasf",
+            "Blonzo,4.32",
+            "Verstrappen,4.75"
+    );
+    public static final List<String> INPUT_CSV_RECORDS_NUM_ERR = Arrays.asList(
+            "Alonzo,safds",
+            "Blonzo,4.32",
+            "Verstrappen,4.75"
+    );
+
 }

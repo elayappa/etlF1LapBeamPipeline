@@ -1,8 +1,6 @@
 package vel.local.wrkspc.f1LapAvrg.transform;
 
 import org.apache.beam.sdk.coders.*;
-import org.apache.beam.sdk.extensions.sorter.BufferedExternalSorter;
-import org.apache.beam.sdk.extensions.sorter.SortValues;
 import org.apache.beam.sdk.transforms.GroupByKey;
 import org.apache.beam.sdk.transforms.MapElements;
 import org.apache.beam.sdk.transforms.PTransform;
@@ -34,7 +32,6 @@ public class SortDriversByLap extends PTransform<PCollection<KV<String, Double>>
      */
     @Override
     public PCollection<String> expand(PCollection<KV<String, Double>> input) {
-        BufferedExternalSorter.Options options1 = BufferedExternalSorter.options();
         return input
                 .apply("CreateKey", MapElements.via(new SimpleFunction<KV<String, Double>, KV<String, KV<DriverLapRecord, Double>>>() {
                     public KV<String, KV<DriverLapRecord, Double>> apply(KV<String, Double> input) {
@@ -42,8 +39,7 @@ public class SortDriversByLap extends PTransform<PCollection<KV<String, Double>>
                     }
                 }))
                 .apply(GroupByKey.create()).setCoder(KvCoder.of(StringUtf8Coder.of(), IterableCoder.of(KvCoder.of(AvroCoder.of(DriverLapRecord.class), DoubleCoder.of()))))
-                .apply(SortValues.create(options1))
-                .apply("FormatResults", MapElements.via(new SimpleFunction<KV<String, Iterable<KV<DriverLapRecord, Double>>>, String>() {
+                .apply("SortAndFormatResults", MapElements.via(new SimpleFunction<KV<String, Iterable<KV<DriverLapRecord, Double>>>, String>() {
                     @Override
                     public String apply(KV<String, Iterable<KV<DriverLapRecord, Double>>> input) {
                         TreeSet<DriverLapRecord> driverLapRecords = new TreeSet<>(StreamSupport.stream(input.getValue().spliterator(), false)
